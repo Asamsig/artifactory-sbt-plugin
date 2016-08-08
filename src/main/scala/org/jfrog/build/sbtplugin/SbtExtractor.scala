@@ -112,11 +112,12 @@ object SbtExtractor {
     //TODO: Compare with build-info-extractor-ivy ArtifactoryBuildListener.doDeploy() some configs are still not present (such as blackduck integration)
     val myACC = makeACC(log, configuration)
     printACC(log, myACC)
-    val contextUrl = myACC.publisher.getContextUrl();
-    val username = myACC.publisher.getUsername();
-    val password = myACC.publisher.getPassword();
+    val contextUrl = myACC.publisher.getContextUrl
+    val username = myACC.publisher.getUsername
+    val password = myACC.publisher.getPassword
+    val opUserToken = Option(myACC.publisher.getUserToken)
     log.info(s"BuildInfo: Publishing ${modules.map (_.module.getId) mkString ", "}")
-    val myABIC: ArtifactoryBuildInfoClient = new ArtifactoryBuildInfoClient(contextUrl, username, password, myACC.getLog)
+    val myABIC: ArtifactoryBuildInfoClient = opUserToken.map(userToken => new ArtifactoryBuildInfoClient(contextUrl, userToken, myACC.getLog)).getOrElse(new ArtifactoryBuildInfoClient(contextUrl, username, password, myACC.getLog))
     //TODO: skipping checks on isPublishArtifacts and isPublishBuildInfo we will assume they are true for now
     //TODO: Haven't really created a buildinfo yet, need to do that.
     //TODO: for now, skipping include/exclude patterns
@@ -219,6 +220,7 @@ object SbtExtractor {
     log.info(s"ACC Publisher URL: ${configuration.publisher.getUrl}")
     log.info(s"ACC Publisher URLwithMatrixParams: ${configuration.publisher.getUrlWithMatrixParams}")
     log.info(s"ACC Publisher Username: ${configuration.publisher.getUsername}")
+    log.info(s"ACC Publisher Token: ${configuration.publisher.getUserToken}")
     log.info(s"ArtifactoryClientConfiguration BuildInfo Stuff:")
     log.info(s"ArtifactoryClientConfiguration BuildInfo: ${configuration.info}")
     log.info(s"ACC Info booleans: ")
